@@ -10,42 +10,148 @@
 </head>
 <body>
     <div class="container">
-        <h1>AI Background Remover</h1>
-        
-        <div class="upload-area" id="uploadArea">
-            <p>Drag and drop an image here or click to select</p>
-            <input type="file" id="fileInput" accept="image/*">
-            <button class="upload-button" onclick="document.getElementById('fileInput').click()">Choose Image</button>
+        <div class="header">
+            <h1>AI Background Remover</h1>
+            <p>Professional background removal powered by advanced algorithms</p>
         </div>
-        
-        <div class="status" id="status"></div>
-        
-        <div class="preview-container" id="previewContainer">
-            <div class="controls">
-                <div class="slider-container">
-                    <label for="thresholdSlider">Sensitivity: <span id="thresholdValue">0.5</span></label>
-                    <input type="range" id="thresholdSlider" min="0" max="1" step="0.01" value="0.5">
+
+        <div class="main-content">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📸</div>
+                <h2>Upload Your Image</h2>
+                <p style="margin: 20px 0; color: #666;">Drag and drop an image here or click to browse</p>
+                <input type="file" id="fileInput" accept="image/*" multiple>
+                <button class="upload-button" onclick="document.getElementById('fileInput').click()">
+                    Choose Image
+                </button>
+                <p style="margin-top: 20px; font-size: 0.9rem; color: #999;">
+                    Supports: JPG, PNG, GIF, WebP | Max size: 50MB
+                </p>
+            </div>
+
+            <div class="workspace" id="workspace">
+                <div class="controls-panel">
+                    <div class="mode-selector">
+                        <button class="mode-button active" data-mode="auto">Auto Mode</button>
+                        <button class="mode-button" data-mode="manual">Manual Mode</button>
+                        <button class="mode-button" data-mode="advanced">Advanced</button>
+                    </div>
+
+                    <div id="autoControls">
+                        <div class="control-group">
+                            <label>Background Detection Sensitivity</label>
+                            <div class="slider-container">
+                                <input type="range" id="sensitivitySlider" min="0" max="1" step="0.01" value="0.3">
+                                <span class="value-display" id="sensitivityValue">0.30</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Edge Refinement</label>
+                            <div class="slider-container">
+                                <input type="range" id="edgeSlider" min="0" max="10" step="1" value="3">
+                                <span class="value-display" id="edgeValue">3</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Feather Amount</label>
+                            <div class="slider-container">
+                                <input type="range" id="featherSlider" min="0" max="20" step="1" value="2">
+                                <span class="value-display" id="featherValue">2px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="manualControls" style="display: none;">
+                        <div class="color-picker-group">
+                            <label>Click on image to select background color:</label>
+                            <div class="color-preview" id="colorPreview" style="background: #ffffff;"></div>
+                            <input type="color" id="colorPicker" style="display: none;">
+                        </div>
+                        <div class="control-group">
+                            <label>Color Tolerance</label>
+                            <div class="slider-container">
+                                <input type="range" id="toleranceSlider" min="0" max="100" step="1" value="30">
+                                <span class="value-display" id="toleranceValue">30%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="advanced-controls" id="advancedControls">
+                        <div class="control-group">
+                            <label>Algorithm</label>
+                            <select id="algorithmSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                                <option value="flood">Flood Fill</option>
+                                <option value="chroma">Chroma Key</option>
+                                <option value="threshold">Threshold</option>
+                                <option value="edge">Edge Detection</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Post-Processing</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <label style="font-weight: normal;"><input type="checkbox" id="despeckle"> Despeckle</label>
+                                <label style="font-weight: normal;"><input type="checkbox" id="smoothEdges" checked> Smooth Edges</label>
+                                <label style="font-weight: normal;"><input type="checkbox" id="preserveDetails"> Preserve Details</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="slider-container">
-                    <label for="smoothingSlider">Edge Smoothing: <span id="smoothingValue">2</span></label>
-                    <input type="range" id="smoothingSlider" min="0" max="5" step="1" value="2">
+
+                <div class="preview-area">
+                    <div class="preview-box">
+                        <h3>📥 Original</h3>
+                        <canvas id="originalCanvas"></canvas>
+                    </div>
+                    <div class="preview-box">
+                        <h3>✨ Background Removed</h3>
+                        <canvas id="resultCanvas" class="checkerboard"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats" id="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="imageSizeStat">-</div>
+                        <div class="stat-label">Image Size</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pixelsRemovedStat">-</div>
+                        <div class="stat-label">Pixels Removed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="processingTimeStat">-</div>
+                        <div class="stat-label">Processing Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="fileSizeStat">-</div>
+                        <div class="stat-label">File Size</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-button primary-button" onclick="downloadImage()">
+                        💾 Download PNG
+                    </button>
+                    <button class="action-button secondary-button" onclick="resetImage()">
+                        🔄 Reset
+                    </button>
+                    <button class="action-button secondary-button" onclick="compareToggle()">
+                        👁️ Compare
+                    </button>
+                    <button class="action-button secondary-button" onclick="uploadNew()">
+                        📤 New Image
+                    </button>
                 </div>
             </div>
-            
-            <div class="preview-grid">
-                <div class="preview-box">
-                    <h3>Original</h3>
-                    <canvas id="originalCanvas"></canvas>
-                </div>
-                <div class="preview-box">
-                    <h3>Background Removed</h3>
-                    <canvas id="resultCanvas" class="checkerboard"></canvas>
-                </div>
-            </div>
-            
-            <button class="download-button" id="downloadButton" onclick="downloadImage()">Download PNG</button>
         </div>
     </div>
+
+    <div class="processing-indicator" id="processingIndicator">
+        <div class="spinner"></div>
+        <p>Processing your image...</p>
+    </div>
+
 
     <script src="./js/script.js"></script>
 
